@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace TencentCloudCls.Examples
 {
@@ -8,14 +9,24 @@ namespace TencentCloudCls.Examples
         {
             var cpf = new ClientProfile
             {
-                Endpoint = null,
-                Credential = new PlainCredential("", ""),
+                Scheme = "http://",
+                // Endpoint = "ap-guangzhou.cls.tencentcs.com",
+                Endpoint = "127.0.0.1",
+                Credential = new PlainCredential(
+                    "", ""),
             };
             var client = new Client(cpf);
 
-            client.UploadLog(ClsHelper.LogFromDictionary(123, new Dictionary<string, string>
-            {
-            }));
+            client.UploadLog("98871791-0320-47a5-ac73-9075b00989bc",
+                ClsHelper.MakeLogGroup(
+                    DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    new Dictionary<string, string>
+                    {
+                        { "key1", "val1" },
+                        { "key2", "val2" },
+                    }
+                )
+            );
         }
     }
 }

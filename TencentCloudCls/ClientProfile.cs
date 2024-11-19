@@ -10,8 +10,8 @@ namespace TencentCloudCls
 
         public string Scheme = "https://";
         public string Endpoint;
-        public string Source;
-        public string Hostname;
+        public string Source = "";
+        public string Hostname = "";
 
         internal void Validate()
         {
@@ -38,6 +38,16 @@ namespace TencentCloudCls
             if (string.IsNullOrEmpty(Endpoint))
             {
                 throw new ArgumentException("Endpoint can not be empty");
+            }
+
+            if (Source == null)
+            {
+                throw new ArgumentException("Source can not be empty");
+            }
+
+            if (Hostname == null)
+            {
+                throw new ArgumentException("Hostname can not be empty");
             }
         }
     }

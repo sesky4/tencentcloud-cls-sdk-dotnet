@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Google.Protobuf;
 
 namespace TencentCloudCls
@@ -11,11 +12,12 @@ namespace TencentCloudCls
 
         private readonly ClientProfile _cpf;
         private readonly HttpClient _httpClient;
-        private ConcurrentDictionary<string, LogGroup> _lgs;
+        private ConcurrentDictionary<string, LogGroupEntry> _lgs;
         private int _batchId;
 
-        private class LogGroupContainer
+        private class LogGroupEntry
         {
+            public string TopicId;
             public LogGroup LogGroup;
         }
 
@@ -25,20 +27,25 @@ namespace TencentCloudCls
 
             _cpf = cpf;
             _httpClient = new HttpClient();
+            _lgs = new ConcurrentDictionary<string, LogGroupEntry>();
         }
 
         public void UploadLog(string topicId, Log log)
         {
-            var lg = _lgs.GetOrAdd(topicId, s => new LogGroup
+            var lge = _lgs.GetOrAdd(topicId, _ => new LogGroupEntry
             {
-                ContextFlow = ClsHelper.ProducerHash,
-                Source = _cpf.Source,
-                Hostname = _cpf.Hostname,
+                TopicId = topicId,
+                LogGroup = new LogGroup
+                {
+                    ContextFlow = ClsHelper.ProducerHash,
+                    Source = _cpf.Source,
+                    Hostname = _cpf.Hostname,
+                },
             });
 
-            lock (lg)
+            lock (lge)
             {
-                lg.Logs.Add(log);
+                lge.LogGroup.Logs.Add(log);
             }
 
             HintUpload();
@@ -46,6 +53,7 @@ namespace TencentCloudCls
 
         private void HintUpload()
         {
+            Flush();
         }
 
         public async void UploadLogAsync()
@@ -54,9 +62,9 @@ namespace TencentCloudCls
 
         private void Flush()
         {
-            foreach (var kv in _lgs)
+            foreach (var lge in _lgs.Values)
             {
-                FlushLogs(kv.Value);
+                FlushLogGroupEntry(lge).GetAwaiter().GetResult();
             }
         }
 
@@ -64,15 +72,16 @@ namespace TencentCloudCls
         {
         }
 
-        private HttpRequestMessage MakeRequest(LogGroup lg)
+        private HttpRequestMessage MakeRequest(LogGroupEntry lge)
         {
             var lgl = new LogGroupList();
-            lgl.LogGroupList_.Add(lg);
+            lgl.LogGroupList_.Add(lge.LogGroup);
             var body = lgl.ToByteArray();
 
-            var req = new HttpRequestMessage();
+            var uri = $"{_cpf.Scheme}{_cpf.Endpoint}/structuredlog";
+            var req = new HttpRequestMessage(HttpMethod.Post, uri);
             req.Content = new ByteArrayContent(body);
-            req.Headers.Add("Content-Type", "application/x-protobuf");
+            req.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-protobuf");
             req.Headers.Add("User-Agent", UserAgent);
 
             var token = _cpf.Credential.Token;
@@ -81,16 +90,17 @@ namespace TencentCloudCls
                 req.Headers.Add("X-Cls-Token", token);
             }
 
-            req.Headers.Authorization = new AuthenticationHeaderValue("");
-            req.Headers.Add("Authorization",
-                ClsHelper.SignRequest(req, _cpf.Credential.SecretId, _cpf.Credential.SecretKey));
+            req.Headers.Authorization = new AuthenticationHeaderValue("", ClsHelper.GetAuthorization(
+            req, lge.TopicId, _cpf.Credential.SecretId, _cpf.Credential.SecretKey));
+            req.Headers.Add("Authorization", ClsHelper.GetAuthorization(
+                req, lge.TopicId, _cpf.Credential.SecretId, _cpf.Credential.SecretKey));
 
             return req;
         }
 
-        private async void FlushLogs(LogGroup lg)
+        private async Task FlushLogGroupEntry(LogGroupEntry lge)
         {
-            using var req = MakeRequest(lg);
+            using var req = MakeRequest(lge);
             var resp = await _httpClient.SendAsync(req);
         }
     }
