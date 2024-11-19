@@ -24,6 +24,10 @@ namespace TencentCloudCls
 
         public static string SignRequest(HttpRequestMessage request, string secretId, string secretKey)
         {
+            return "";
         }
+
+        // todo:
+        public static string ProducerHash => "";
     }
 }
