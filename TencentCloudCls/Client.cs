@@ -122,15 +122,23 @@ namespace TencentCloudCls
                     return;
                 }
 
-                if (lge.PolicyStat.BatchCount < _cpf.SendPolicy.MaxBatchCount
-                    && lge.PolicyStat.BatchSize < _cpf.SendPolicy.MaxBatchSize
-                    && DateTime.Now - lge.PolicyStat.LastUpload < _cpf.SendPolicy.FlushInterval)
+                var countOk = lge.PolicyStat.BatchCount > _cpf.SendPolicy.MaxBatchCount;
+                var sizeOk = lge.PolicyStat.BatchSize > _cpf.SendPolicy.MaxBatchSize;
+                var intervalOk = _cpf.SendPolicy.FlushInterval != TimeSpan.Zero &&
+                                 DateTime.Now - lge.PolicyStat.LastUpload > _cpf.SendPolicy.FlushInterval;
+                var shouldUpload = countOk || sizeOk || intervalOk;
+
+                if (!shouldUpload)
                 {
                     return;
                 }
 
+                Console.WriteLine($"now={DateTime.Now}, last={lge.PolicyStat.LastUpload}");
                 _cpf.Logger.Log(LogLevel.Debug,
-                    $"HintUpload: c={lge.PolicyStat.BatchCount} c2={lge.LogGroup.Logs.Count} sz={lge.PolicyStat.BatchSize} sz2={lge.LogGroup.CalculateSize()}");
+                    $"HintUpload: " +
+                    $"count={lge.LogGroup.Logs.Count} " +
+                    $"last_upload={lge.PolicyStat.LastUpload} " +
+                    $"size={lge.PolicyStat.BatchSize} ");
 
                 toUpload = lge.LogGroup;
                 lge.LogGroup = new LogGroup();

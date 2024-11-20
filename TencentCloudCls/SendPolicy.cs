@@ -21,7 +21,7 @@ namespace TencentCloudCls
         public static readonly SendPolicy LargeBatch = new()
         {
             MaxBatchSize = 4 * 1024 * 1024,
-            MaxBatchCount = 1024,
+            MaxBatchCount = 10240,
             FlushInterval = TimeSpan.FromMilliseconds(5000),
             MaxRetry = 3,
             Worker = 10,

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using TencentCloudCls.Compression;
 
 namespace TencentCloudCls.Examples
 {
-    public class Example
+    public static class Example
     {
         public static void Main()
         {
@@ -14,12 +16,12 @@ namespace TencentCloudCls.Examples
             var secretId = Environment.GetEnvironmentVariable("TENCENTCLOUD_SECRET_ID")!;
             var secretKey = Environment.GetEnvironmentVariable("TENCENTCLOUD_SECRET_KEY")!;
             var topicId = Environment.GetEnvironmentVariable("CLS_TOPIC_ID")!;
-            
+
             var cpf = new ClientProfile
             {
                 Scheme = scheme,
                 Endpoint = endpoint,
-                SendPolicy = SendPolicy.SmallBatch,
+                SendPolicy = SendPolicy.Immediate,
                 Compressor = new Lz4Compressor(),
                 Credential = new PlainCredential(secretId, secretKey),
                 Source = ClsHelper.GetIpAddress(),
@@ -39,16 +41,26 @@ namespace TencentCloudCls.Examples
 
             var client = new Client(cpf);
 
-            for (var i = 0ul; i < ulong.MaxValue; i++)
+            for (var i = 0; i < 3; i++)
             {
-                client.UploadLog(topicId, ClsHelper.CreateLogGroup(new Dictionary<string, string>
-                        {
-                            { "t", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") },
-                            { "num", i.ToString() },
-                        }
-                    )
-                );
+                var threadNo = i;
+                new Thread(() =>
+                {
+                    for (var j = 0ul; j < ulong.MaxValue; j++)
+                    {
+                        client.UploadLog(topicId, ClsHelper.CreateLogGroup(new Dictionary<string, string>
+                                {
+                                    { "t", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") },
+                                    { "num", j.ToString() },
+                                    { "msg", string.Concat(Enumerable.Repeat(Guid.NewGuid().ToString(), 20)) },
+                                }
+                            )
+                        );
+                        // Console.WriteLine($"upload: thread={threadNo} index={j}");
+                    }
+                }).Start();
             }
+
 
             Console.Read();
         }
