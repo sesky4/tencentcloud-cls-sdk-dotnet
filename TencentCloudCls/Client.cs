@@ -17,7 +17,7 @@ namespace TencentCloudCls
         private readonly ConcurrentDictionary<string, LogGroupEntry> _lgs = new();
 
         private readonly string _contextId = ClsHelper.CreateContextId();
-        private ulong _lgId;
+        private long _lgId;
         private readonly AsyncQueue<UploadTask> _toUpload;
 
         private HttpClient _httpClient = new();
@@ -250,7 +250,7 @@ namespace TencentCloudCls
             while (true)
             {
                 await Task.Delay(_cpf.SendPolicy.FlushInterval);
-                foreach (var (_, lge) in _lgs)
+                foreach (var lge in _lgs.Values)
                 {
                     await HintUpload(lge);
                 }

@@ -5,9 +5,10 @@
         <OutputType>Exe</OutputType>
         <RootNamespace>TencentCloudCls.Examples</RootNamespace>
         <AssemblyName>TencentCloudCls.Examples</AssemblyName>
-        <TargetFramework>net7</TargetFramework>
+        <TargetFramework>net462</TargetFramework>
         <FileAlignment>512</FileAlignment>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+        <LangVersion>9</LangVersion>
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="Example.cs" />

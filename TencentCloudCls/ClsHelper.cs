@@ -68,12 +68,17 @@ namespace TencentCloudCls
                    $"&q-signature={signHex}";
         }
 
+        private static readonly Random SharedRandom = new((int)DateTime.Now.Ticks);
+
         internal static string CreateContextId()
         {
-            return Random.Shared.NextInt64().ToString("X");
+            var lo = (long)SharedRandom.Next();
+            var hi = (long)SharedRandom.Next();
+            var val = hi << 32 | lo;
+            return val.ToString("X");
         }
 
-        internal static string CreateContextFlow(string contextId, ulong logGroupId)
+        internal static string CreateContextFlow(string contextId, long logGroupId)
         {
             return $"{contextId}-{logGroupId:X}";
         }
