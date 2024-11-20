@@ -1,4 +1,6 @@
 ﻿using System;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using TencentCloudCls.Compression;
 
 namespace TencentCloudCls
@@ -6,12 +8,14 @@ namespace TencentCloudCls
     public class ClientProfile
     {
         public ICredential Credential;
-        public ICompressor Compressor = new NoCompressor();
+        public ICompressor Compressor = new Lz4Compressor();
+        public SendPolicy SendPolicy = SendPolicy.Default;
 
         public string Scheme = "https://";
         public string Endpoint;
         public string Source = "";
         public string Hostname = "";
+        public ILogger Logger = NullLogger.Instance;
 
         internal void Validate()
         {
@@ -49,6 +53,8 @@ namespace TencentCloudCls
             {
                 throw new ArgumentException("Hostname can not be empty");
             }
+
+            SendPolicy.Validate();
         }
     }
 }

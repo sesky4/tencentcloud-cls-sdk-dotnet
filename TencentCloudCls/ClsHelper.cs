@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -9,11 +11,11 @@ namespace TencentCloudCls
 {
     public static class ClsHelper
     {
-        public static Log MakeLogGroup(long time, Dictionary<string, string> logEntries)
+        public static Log CreateLogGroup(Dictionary<string, string> logEntries)
         {
             var log = new Log
             {
-                Time = time
+                Time = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
             };
 
             log.Contents.AddRange(logEntries.Select(e => new Log.Types.Content
@@ -66,8 +68,34 @@ namespace TencentCloudCls
                    $"&q-signature={signHex}";
         }
 
+        internal static string CreateContextId()
+        {
+            return Random.Shared.NextInt64().ToString("X");
+        }
 
-        // todo:
-        public static string ProducerHash => "";
+        internal static string CreateContextFlow(string contextId, ulong logGroupId)
+        {
+            return $"{contextId}-{logGroupId:X}";
+        }
+
+        public static string GetIpAddress()
+        {
+            foreach (var address in Dns.GetHostAddresses(Dns.GetHostName()))
+            {
+                if (address.AddressFamily != AddressFamily.InterNetwork || IPAddress.IsLoopback(address))
+                {
+                    continue;
+                }
+
+                return address.ToString();
+            }
+
+            throw new Exception("no valid ip address found");
+        }
+
+        public static string GetHostname()
+        {
+            return Dns.GetHostName();
+        }
     }
 }

@@ -6,7 +6,7 @@
         <RootNamespace>TencentCloudCls</RootNamespace>
         <AssemblyName>TencentCloudCls</AssemblyName>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-        <TargetFramework>net8</TargetFramework>
+        <TargetFramework>net7</TargetFramework>
         <FileAlignment>512</FileAlignment>
         <LangVersion>9</LangVersion>
     </PropertyGroup>
@@ -50,22 +50,28 @@
         <Reference Include="System.Xml"/>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="AsyncQueue.cs" />
         <Compile Include="Client.cs" />
         <Compile Include="Cls.cs" />
         <Compile Include="ClientProfile.cs" />
         <Compile Include="ClsHelper.cs" />
-        <Compile Include="Compression\CompressedHttpContent.cs" />
         <Compile Include="Compression\ICompressor.cs" />
         <Compile Include="Compression\LZ4Compressor.cs" />
         <Compile Include="Compression\NoCompressor.cs" />
         <Compile Include="ICredential.cs" />
         <Compile Include="PlainCredential.cs" />
+        <Compile Include="SendPolicy.cs" />
+        <Compile Include="TencentCloudSDKError.cs" />
     </ItemGroup>
     <ItemGroup>
       <Content Include="Cls.proto" />
     </ItemGroup>
     <ItemGroup>
       <None Include="packages.config" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="K4os.Compression.LZ4" Version="1.3.8" />
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
     </ItemGroup>
 
 </Project>

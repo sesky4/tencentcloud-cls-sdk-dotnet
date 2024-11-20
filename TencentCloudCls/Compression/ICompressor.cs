@@ -5,6 +5,6 @@ namespace TencentCloudCls.Compression
 {
     public interface ICompressor
     {
-        internal HttpContent Compress(IMessage message);
+        public void CreateContent(HttpRequestMessage request, IMessage message);
     }
 }
