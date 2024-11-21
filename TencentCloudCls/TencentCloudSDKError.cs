@@ -10,6 +10,7 @@ namespace TencentCloudCls
         public readonly string Reason;
 
         public TencentCloudSdkError(HttpStatusCode httpStatusCode, string requestId, string reason)
+            : base(FormatError(httpStatusCode, requestId, reason))
         {
             HttpStatusCode = httpStatusCode;
             RequestId = requestId;
