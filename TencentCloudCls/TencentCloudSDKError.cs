@@ -18,7 +18,12 @@ namespace TencentCloudCls
 
         public override string ToString()
         {
-            return $"Status={HttpStatusCode} RequestId={RequestId} Reason={Reason}";
+            return FormatError(HttpStatusCode, RequestId, Reason);
+        }
+
+        private static string FormatError(HttpStatusCode httpStatusCode, string requestId, string reason)
+        {
+            return $"Status={httpStatusCode} RequestId={requestId} Reason={reason}";
         }
     }
 }
