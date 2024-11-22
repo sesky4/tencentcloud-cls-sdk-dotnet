@@ -46,7 +46,7 @@ namespace TencentCloudCls.Examples
                 var threadNo = i;
                 new Thread(() =>
                 {
-                    for (var j = 0ul; j < ulong.MaxValue; j++)
+                    for (var j = 0ul; j < 100; j++)
                     {
                         client.UploadLog(topicId, ClsHelper.CreateLogGroup(new Dictionary<string, string>
                                 {
@@ -56,7 +56,7 @@ namespace TencentCloudCls.Examples
                                 }
                             )
                         );
-                        // Console.WriteLine($"upload: thread={threadNo} index={j}");
+                        Console.WriteLine($"upload: thread={threadNo} index={j}");
                     }
                 }).Start();
             }
