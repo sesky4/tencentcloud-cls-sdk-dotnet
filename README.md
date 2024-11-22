@@ -5,11 +5,13 @@ TencentCloudCls Log SDK
 
 ### 安装
 
+SDK 托管在 NUGET 包管理平台，可通过 NUGET 安装。
+
 https://www.nuget.org/packages/TencentCloudCls
 
-### CLS Host
+### CLS Endpoint
 
-endpoint 填写请参考[可用地域](https://cloud.tencent.com/document/product/614/18940#.E5.9F.9F.E5.90.8D)中 **API上传日志**
+Endpoint 填写请参考[可用地域](https://cloud.tencent.com/document/product/614/18940#.E5.9F.9F.E5.90.8D)中 **API上传日志**
 Tab 中的域名![image-20230403191435319](https://github.com/TencentCloud/tencentcloud-cls-sdk-js/blob/main/demo.png)
 
 ### 密钥信息
@@ -17,7 +19,7 @@ Tab 中的域名![image-20230403191435319](https://github.com/TencentCloud/tence
 SecretId 和 SecretKey 为云API密钥，密钥信息获取请前往[密钥获取](https://console.cloud.tencent.com/cam/capi)
 。并请确保密钥关联的账号具有相应的[SDK上传日志权限](https://cloud.tencent.com/document/product/614/68374#.E4.BD.BF.E7.94.A8-api-.E4.B8.8A.E4.BC.A0.E6.95.B0.E6.8D.AE)
 
-## 同步 VS 异步
+### 同步 VS 异步
 
 SDK 支持同步和异步两种发送模式，同步会实时将日志上传，异步会将日志在后台聚合再上传。同步上传模式拥有更好的实时性，异步上传模式拥有更好的性能，大部分场景对日志上传的实时性要求不高，因此推荐使用异步模式。
 
