@@ -6,7 +6,7 @@ namespace TencentCloudCls.Compression
 {
     public class NoCompressor : ICompressor
     {
-        void ICompressor.CreateContent(HttpRequestMessage request, IMessage message)
+        void ICompressor.CompressContent(HttpRequestMessage request, IMessage message)
         {
             var body = message.ToByteArray();
             var httpContent = new ByteArrayContent(body);

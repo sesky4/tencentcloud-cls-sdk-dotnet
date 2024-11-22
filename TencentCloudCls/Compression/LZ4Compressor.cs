@@ -9,7 +9,7 @@ namespace TencentCloudCls.Compression
     {
         public LZ4Level Lz4Level = LZ4Level.L00_FAST;
 
-        public void CreateContent(HttpRequestMessage request, IMessage message)
+        void ICompressor.CompressContent(HttpRequestMessage request, IMessage message)
         {
             var body = message.ToByteArray();
             var lz4Body = new byte[LZ4Codec.MaximumOutputSize(body.Length)];

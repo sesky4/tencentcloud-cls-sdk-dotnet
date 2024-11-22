@@ -179,7 +179,7 @@ namespace TencentCloudCls
             var request = new HttpRequestMessage(HttpMethod.Post, uri);
             request.Headers.Add("User-Agent", UserAgent);
 
-            _cpf.Compressor.CreateContent(request, lgl);
+            _cpf.Compressor.CompressContent(request, lgl);
 
             var token = _cpf.Credential.Token;
             if (!string.IsNullOrEmpty(token))
