@@ -34,24 +34,24 @@ SDK 支持同步和异步两种发送模式，同步会实时将日志上传，�
 
 ClientProfile
 
-| 参数         | 类型          | 描述                                 |
-|------------|-------------|------------------------------------|
-| Credential | ICredential | 账户密钥                               |
-| Compressor | ICompressor | 压缩算法，支持 lz4 和 无压缩，默认为 lz4          |    
-| SendPolicy | SendPolicy  | 日志聚合上传策略，详见下方的 SendPolicy 参数详解     |
-| Scheme     | string      | CLS 请求协议，默认为 https://              |
-| Endpoint   | string      | CLS 请求域名                           |
+| 参数         | 类型          | 描述                                   |
+|------------|-------------|--------------------------------------|
+| Credential | ICredential | 账户密钥                                 |
+| Compressor | ICompressor | 压缩算法，支持 lz4 和 无压缩，默认为 lz4            |    
+| SendPolicy | SendPolicy  | 日志聚合上传策略，详见下方的 `SendPolicy` 参数详解     |
+| Scheme     | string      | CLS 请求协议，默认为 `https://`              |
+| Endpoint   | string      | CLS 请求域名                             |
 | Source     | string      | 日志来源，一般使用机器IP，作为日志 `__SOURCE__` 字段上报 |
-| Hostname   | string      | 主机 hostname，作为日志 `__HOSTNAME__` 字段上报 |
-| Logger     | ILogger     | 日志输出 logger，默认不输出日志                |
+| Hostname   | string      | 主机名，作为日志 `__HOSTNAME__` 字段上报         |
+| Logger     | ILogger     | 日志输出 logger，默认不输出日志                  |
 
 SendPolicy
 
-| 参数               | 类型       | 描述                                                                    |
-|------------------|----------|-----------------------------------------------------------------------|
-| MaxBatchSize     | ulong    | 实例能缓存的日志大小上限，单位为 byte                                                 |
-| MaxBatchCount    | ulong    | 实例能缓存的日志条数上限                                                          |    
-| FlushInterval    | TimeSpan | 日志从创建到可发送的逗留时间                                                        |
-| MaxRetry         | uint     | 上报日志失败时的重试次数                                                          |
+| 参数               | 类型       | 描述                                                                      |
+|------------------|----------|-------------------------------------------------------------------------|
+| MaxBatchSize     | ulong    | 实例能缓存的日志大小上限，单位为 byte；0 表示不缓存，同步上传                                      |
+| MaxBatchCount    | ulong    | 实例能缓存的日志条数上限；0 表示不缓存，同步上传                                               |    
+| FlushInterval    | TimeSpan | 日志从创建到可发送的逗留时间                                                          |
+| MaxRetry         | uint     | 上报日志失败时的重试次数                                                            |
 | MaxRetryInterval | uint     | 上报日志失败时的重试最大间隔，重试间隔采用指数退避，第 N 次重试间隔为 `Min(2^(N-1), MaxRetryInterval)` 秒 |
-| Worker           | uint     | 异步场景下上报日志的 worker 数量                                                  |
+| Worker           | uint     | 异步场景下上报日志的 worker 数量                                                    |
