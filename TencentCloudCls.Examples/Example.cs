@@ -15,15 +15,17 @@ namespace TencentCloudCls.Examples
             var endpoint = "ap-guangzhou.cls.tencentcs.com";
             var secretId = Environment.GetEnvironmentVariable("TENCENTCLOUD_SECRET_ID")!;
             var secretKey = Environment.GetEnvironmentVariable("TENCENTCLOUD_SECRET_KEY")!;
+            // 临时密钥需要 token, 如果非临时密钥 token 赋值为空即可
+            var token = Environment.GetEnvironmentVariable("TENCENTCLOUD_TOKEN")!;
             var topicId = Environment.GetEnvironmentVariable("CLS_TOPIC_ID")!;
 
             var cpf = new ClientProfile
             {
                 Scheme = scheme,
                 Endpoint = endpoint,
-                SendPolicy = SendPolicy.Immediate,
+                SendPolicy = SendPolicy.SmallBatch,
                 Compressor = new Lz4Compressor(),
-                Credential = new PlainCredential(secretId, secretKey),
+                Credential = new PlainCredential(secretId, secretKey, token),
                 Source = ClsHelper.GetIpAddress(),
                 Hostname = ClsHelper.GetHostname(),
                 Logger = LoggerFactory.Create(
