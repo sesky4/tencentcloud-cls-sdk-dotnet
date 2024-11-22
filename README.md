@@ -41,8 +41,8 @@ ClientProfile
 | SendPolicy | SendPolicy  | 日志聚合上传策略，详见下方的 SendPolicy 参数详解     |
 | Scheme     | string      | CLS 请求协议，默认为 https://              |
 | Endpoint   | string      | CLS 请求域名                           |
-| Source     | string      | 日志来源，一般使用机器IP，作为日志 __SOURCE__ 字段上报 |
-| Hostname   | string      | 主机 hostname，作为日志 __HOSTNAME__ 字段上报 |
+| Source     | string      | 日志来源，一般使用机器IP，作为日志 `__SOURCE__` 字段上报 |
+| Hostname   | string      | 主机 hostname，作为日志 `__HOSTNAME__` 字段上报 |
 | Logger     | ILogger     | 日志输出 logger，默认不输出日志                |
 
 SendPolicy
