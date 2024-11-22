@@ -45,10 +45,11 @@ ClientProfile
 
 SendPolicy
 
-| 参数            | 类型       | 描述                    |
-|---------------|----------|-----------------------|
-| MaxBatchSize  | ulong    | 实例能缓存的日志大小上限，单位为 byte |
-| MaxBatchCount | ulong    | 实例能缓存的日志条数上限          |    
-| FlushInterval | TimeSpan | 日志从创建到可发送的逗留时间        |
-| MaxRetry      | uint     | 上报日志失败时的重试次数          |
-| Worker        | uint     | 异步场景下上报日志的 worker 数量  |
+| 参数               | 类型       | 描述                                                                    |
+|------------------|----------|-----------------------------------------------------------------------|
+| MaxBatchSize     | ulong    | 实例能缓存的日志大小上限，单位为 byte                                                 |
+| MaxBatchCount    | ulong    | 实例能缓存的日志条数上限                                                          |    
+| FlushInterval    | TimeSpan | 日志从创建到可发送的逗留时间                                                        |
+| MaxRetry         | uint     | 上报日志失败时的重试次数                                                          |
+| MaxRetryInterval | uint     | 上报日志失败时的重试最大间隔，重试间隔采用指数退避，第 N 次重试间隔为 `Min(2^(N-1), MaxRetryInterval)` 秒 |
+| Worker           | uint     | 异步场景下上报日志的 worker 数量                                                  |

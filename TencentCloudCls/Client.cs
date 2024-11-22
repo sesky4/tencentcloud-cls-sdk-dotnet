@@ -203,6 +203,9 @@ namespace TencentCloudCls
 
         private async Task FlushLogGroupEntry(string topicId, LogGroup lg)
         {
+            var maxDelay = _cpf.SendPolicy.MaxRetryInterval;
+            var delay = TimeSpan.FromSeconds(1);
+
             for (var i = 0; i <= _cpf.SendPolicy.MaxRetry; i++)
             {
                 using var req = CreateRequest(topicId, lg);
@@ -215,8 +218,14 @@ namespace TencentCloudCls
                 }
 
                 _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count}");
-                if (i < _cpf.SendPolicy.MaxRetry)
+                if (i < _cpf.SendPolicy.MaxRetry && Retryable(resp))
                 {
+                    await Task.Delay(delay);
+                    delay += delay;
+                    if (delay > maxDelay)
+                    {
+                        delay = maxDelay;
+                    }
                     continue;
                 }
 
@@ -226,6 +235,14 @@ namespace TencentCloudCls
                 var httpBody = await resp.Content.ReadAsStringAsync();
                 throw new TencentCloudSdkError(resp.StatusCode, requestId, httpBody);
             }
+        }
+
+        private static bool Retryable(HttpResponseMessage response)
+        {
+            return response.StatusCode != HttpStatusCode.Unauthorized &&
+                   response.StatusCode != HttpStatusCode.Forbidden &&
+                   response.StatusCode != HttpStatusCode.NotFound &&
+                   response.StatusCode != HttpStatusCode.RequestEntityTooLarge;
         }
 
         private async void UploadWorker()
@@ -265,6 +282,7 @@ namespace TencentCloudCls
             {
                 lock (this)
                 {
+                    Console.WriteLine("newClient");
                     _httpClient = new HttpClient();
                     _httpClientCreateTime = DateTime.Now;
                 }

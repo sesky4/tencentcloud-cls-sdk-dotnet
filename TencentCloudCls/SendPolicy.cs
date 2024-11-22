@@ -7,6 +7,7 @@ namespace TencentCloudCls
         public static readonly SendPolicy Immediate = new()
         {
             MaxRetry = 3,
+            MaxRetryInterval = TimeSpan.FromSeconds(60),
         };
 
         public static readonly SendPolicy SmallBatch = new()
@@ -15,6 +16,7 @@ namespace TencentCloudCls
             MaxBatchCount = 4096,
             FlushInterval = TimeSpan.FromMilliseconds(100),
             MaxRetry = 3,
+            MaxRetryInterval = TimeSpan.FromSeconds(60),
             Worker = 10,
         };
 
@@ -24,6 +26,7 @@ namespace TencentCloudCls
             MaxBatchCount = 10240,
             FlushInterval = TimeSpan.FromMilliseconds(5000),
             MaxRetry = 3,
+            MaxRetryInterval = TimeSpan.FromSeconds(60),
             Worker = 10,
         };
 
@@ -37,11 +40,14 @@ namespace TencentCloudCls
         // MaxBatchCount = 0 means no batch.
         public ulong MaxBatchCount;
 
-        // Upload all cached logs every {FlushInterval} per topic
+        // Upload all cached logs every {FlushInterval} per topic.
         public TimeSpan FlushInterval;
 
         // Max upload retry before reporting error.
         public uint MaxRetry;
+
+        // Max duration between two retries.
+        public TimeSpan MaxRetryInterval;
 
         // Number of workers to upload log in background.
         public uint Worker;
@@ -69,6 +75,11 @@ namespace TencentCloudCls
             if (Worker == 0)
             {
                 throw new ArgumentException("Worker should be greater than 0");
+            }
+
+            if (MaxRetryInterval.Equals(TimeSpan.Zero))
+            {
+                throw new ArgumentException("MaxRetryInterval should be greater than 0");
             }
         }
 
