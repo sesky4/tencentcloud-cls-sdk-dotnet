@@ -133,7 +133,6 @@ namespace TencentCloudCls
                     return;
                 }
 
-                Console.WriteLine($"now={DateTime.Now}, last={lge.PolicyStat.LastUpload}");
                 _cpf.Logger.Log(LogLevel.Debug,
                     $"HintUpload: " +
                     $"count={lge.LogGroup.Logs.Count} " +
@@ -282,7 +281,6 @@ namespace TencentCloudCls
             {
                 lock (this)
                 {
-                    Console.WriteLine("newClient");
                     _httpClient = new HttpClient();
                     _httpClientCreateTime = DateTime.Now;
                 }
