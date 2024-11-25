@@ -216,15 +216,17 @@ namespace TencentCloudCls
                     return;
                 }
 
-                _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
                 if (i < _cpf.SendPolicy.MaxRetry && Retryable(resp))
                 {
+                    _cpf.Logger.Log(LogLevel.Debug,
+                        $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
                     await Task.Delay(delay);
                     delay += delay;
                     if (delay > maxDelay)
                     {
                         delay = maxDelay;
                     }
+
                     continue;
                 }
 
