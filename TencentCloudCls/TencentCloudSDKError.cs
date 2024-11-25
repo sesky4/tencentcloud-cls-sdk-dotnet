@@ -9,6 +9,10 @@ namespace TencentCloudCls
         public readonly string RequestId;
         public readonly string Reason;
 
+        public TencentCloudSdkError(string reason) : this(HttpStatusCode.OK, "", reason)
+        {
+        }
+
         public TencentCloudSdkError(HttpStatusCode httpStatusCode, string requestId, string reason)
             : base(FormatError(httpStatusCode, requestId, reason))
         {

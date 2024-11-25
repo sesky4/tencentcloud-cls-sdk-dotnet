@@ -70,6 +70,8 @@ namespace TencentCloudCls
                 throw new ArgumentNullException(nameof(topicId));
             }
 
+            ValidateLog(log);
+
             if (_cpf.SendPolicy.EnableBatch)
             {
                 await UploadLogInBatch(topicId, log);
@@ -77,6 +79,28 @@ namespace TencentCloudCls
             else
             {
                 await UploadLogImmediate(topicId, log);
+            }
+        }
+
+        private void ValidateLog(Log log)
+        {
+            const int kvSizeLimit = 1 * 1024 * 1024;
+            const int logSizeLimit = 5 * 1024 * 1024;
+
+            var logSize = 0;
+            foreach (var logContent in log.Contents)
+            {
+                logSize += logContent.Key.Length;
+                logSize += logContent.Value.Length;
+                if (logContent.Key.Length > kvSizeLimit || logContent.Value.Length > kvSizeLimit)
+                {
+                    throw new TencentCloudSdkError("The size of the log key/value cannot exceed 1MB");
+                }
+            }
+
+            if (logSize > logSizeLimit)
+            {
+                throw new TencentCloudSdkError("The size of the log cannot exceed 5MB");
             }
         }
 
@@ -210,7 +234,7 @@ namespace TencentCloudCls
                 using var req = CreateRequest(topicId, lg);
                 _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Start: topic={topicId} logs={lg.Logs.Count}");
                 using var resp = await GetHttpClient().SendAsync(req);
-                _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.End: topic={topicId} logs={lg.Logs.Count}");
+                _cpf.Logger.Log(LogLevel.Warning, $"FlushLogGroupEntry.End: topic={topicId} logs={lg.Logs.Count}");
                 if (resp.StatusCode == HttpStatusCode.OK)
                 {
                     return;
@@ -218,7 +242,7 @@ namespace TencentCloudCls
 
                 if (i < _cpf.SendPolicy.MaxRetry && Retryable(resp))
                 {
-                    _cpf.Logger.Log(LogLevel.Debug,
+                    _cpf.Logger.Log(LogLevel.Warning,
                         $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
                     await Task.Delay(delay);
                     delay += delay;
@@ -230,7 +254,7 @@ namespace TencentCloudCls
                     continue;
                 }
 
-                _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Throw: topic={topicId} logs={lg.Logs.Count}");
+                _cpf.Logger.Log(LogLevel.Error, $"FlushLogGroupEntry.Throw: topic={topicId} logs={lg.Logs.Count}");
 
                 var requestId = resp.Headers.GetValues("X-Cls-Requestid").FirstOrDefault();
                 var httpBody = await resp.Content.ReadAsStringAsync();
