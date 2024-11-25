@@ -209,14 +209,14 @@ namespace TencentCloudCls
             {
                 using var req = CreateRequest(topicId, lg);
                 _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Start: topic={topicId} logs={lg.Logs.Count}");
-                var resp = await GetHttpClient().SendAsync(req);
+                using var resp = await GetHttpClient().SendAsync(req);
                 _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.End: topic={topicId} logs={lg.Logs.Count}");
                 if (resp.StatusCode == HttpStatusCode.OK)
                 {
                     return;
                 }
 
-                _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count}");
+                _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
                 if (i < _cpf.SendPolicy.MaxRetry && Retryable(resp))
                 {
                     await Task.Delay(delay);
