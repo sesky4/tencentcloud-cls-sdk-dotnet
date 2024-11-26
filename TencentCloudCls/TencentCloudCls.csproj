@@ -5,6 +5,8 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>TencentCloudCls</RootNamespace>
         <AssemblyName>TencentCloudCls</AssemblyName>
+        <PackageId>TencentCloudCls</PackageId>
+        <PackageProjectUrl>https://github.com/TencentCloud/tencentcloud-cls-sdk-dotnet</PackageProjectUrl>
         <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
         <TargetFramework>net462</TargetFramework>
         <FileAlignment>512</FileAlignment>
