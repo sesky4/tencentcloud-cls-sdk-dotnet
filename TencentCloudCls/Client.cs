@@ -229,7 +229,6 @@ namespace TencentCloudCls
             var maxDelay = _cpf.SendPolicy.MaxRetryInterval;
             var delay = TimeSpan.FromSeconds(1);
 
-
             for (var i = 0; i <= _cpf.SendPolicy.MaxRetry; i++)
             {
                 try
