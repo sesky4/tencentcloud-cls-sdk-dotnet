@@ -229,40 +229,69 @@ namespace TencentCloudCls
             var maxDelay = _cpf.SendPolicy.MaxRetryInterval;
             var delay = TimeSpan.FromSeconds(1);
 
+
             for (var i = 0; i <= _cpf.SendPolicy.MaxRetry; i++)
             {
-                using var req = CreateRequest(topicId, lg);
-                _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Start: topic={topicId} logs={lg.Logs.Count}");
-                using var resp = await GetHttpClient().SendAsync(req);
-                _cpf.Logger.Log(LogLevel.Warning, $"FlushLogGroupEntry.End: topic={topicId} logs={lg.Logs.Count}");
-                if (resp.StatusCode == HttpStatusCode.OK)
+                try
                 {
-                    return;
-                }
+                    using var req = CreateRequest(topicId, lg);
+                    _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Start: topic={topicId} logs={lg.Logs.Count}");
 
-                if (i < _cpf.SendPolicy.MaxRetry && Retryable(resp))
-                {
-                    _cpf.Logger.Log(LogLevel.Warning,
-                        $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
-                    await Task.Delay(delay);
-                    delay += delay;
-                    if (delay > maxDelay)
+                    using var resp = await GetHttpClient().SendAsync(req);
+                    _cpf.Logger.Log(LogLevel.Warning, $"FlushLogGroupEntry.End: topic={topicId} logs={lg.Logs.Count}");
+                    if (resp.StatusCode == HttpStatusCode.OK)
                     {
-                        delay = maxDelay;
+                        return;
                     }
 
-                    continue;
+                    if (!await ShouldRetryAndWait(i, resp))
+                    {
+                        _cpf.Logger.Log(LogLevel.Error,
+                            $"FlushLogGroupEntry.Throw: topic={topicId} logs={lg.Logs.Count}");
+                        var requestId = resp.Headers.GetValues("X-Cls-Requestid").FirstOrDefault();
+                        var httpBody = await resp.Content.ReadAsStringAsync();
+                        throw new TencentCloudSdkError(resp.StatusCode, requestId, httpBody);
+                    }
+
+                    _cpf.Logger.Log(LogLevel.Warning,
+                        $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
+                }
+                catch (Exception e)
+                {
+                    _cpf.Logger.Log(LogLevel.Error,
+                        $"FlushLogGroupEntry.Err: topic={topicId} logs={lg.Logs.Count} err={e}");
+
+                    if (!await ShouldRetryAndWait(i, null))
+                    {
+                        throw;
+                    }
+
+                    _cpf.Logger.Log(LogLevel.Warning,
+                        $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
+                }
+            }
+
+            async Task<bool> ShouldRetryAndWait(int retryTimes, HttpResponseMessage resp)
+            {
+                if (retryTimes >= _cpf.SendPolicy.MaxRetry)
+                    return false;
+
+                if (resp != null && !IsRetryableResp(resp))
+                    return false;
+
+                await Task.Delay(delay);
+
+                delay += delay;
+                if (delay > maxDelay)
+                {
+                    delay = maxDelay;
                 }
 
-                _cpf.Logger.Log(LogLevel.Error, $"FlushLogGroupEntry.Throw: topic={topicId} logs={lg.Logs.Count}");
-
-                var requestId = resp.Headers.GetValues("X-Cls-Requestid").FirstOrDefault();
-                var httpBody = await resp.Content.ReadAsStringAsync();
-                throw new TencentCloudSdkError(resp.StatusCode, requestId, httpBody);
+                return true;
             }
         }
 
-        private static bool Retryable(HttpResponseMessage response)
+        private static bool IsRetryableResp(HttpResponseMessage response)
         {
             return response.StatusCode != HttpStatusCode.Unauthorized &&
                    response.StatusCode != HttpStatusCode.Forbidden &&
@@ -270,7 +299,7 @@ namespace TencentCloudCls
                    response.StatusCode != HttpStatusCode.RequestEntityTooLarge;
         }
 
-        private async void UploadWorker()
+        private async Task UploadWorker()
         {
             while (true)
             {
@@ -284,17 +313,28 @@ namespace TencentCloudCls
                     _cpf.Logger.Log(LogLevel.Error,
                         $"UploadWorker.Upload: topic={task.TopicId} logs={task.LogGroup.Logs.Count} err={e}");
                 }
+                catch (Exception e)
+                {
+                    _cpf.Logger.Log(LogLevel.Error, $"UploadWorker.FlushLogGroupEntry.Error: err={e}");
+                }
             }
         }
 
-        private async void IntervalUploadWorker()
+        private async Task IntervalUploadWorker()
         {
             while (true)
             {
                 await Task.Delay(_cpf.SendPolicy.FlushInterval);
                 foreach (var lge in _lgs.Values)
                 {
-                    await HintUpload(lge);
+                    try
+                    {
+                        await HintUpload(lge);
+                    }
+                    catch (Exception e)
+                    {
+                        _cpf.Logger.Log(LogLevel.Error, $"IntervalUploadWorker.HintUpload.Error: err={e}");
+                    }
                 }
             }
         }
