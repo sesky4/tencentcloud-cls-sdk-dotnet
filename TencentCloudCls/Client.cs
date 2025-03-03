@@ -237,7 +237,7 @@ namespace TencentCloudCls
                     _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Start: topic={topicId} logs={lg.Logs.Count}");
 
                     using var resp = await GetHttpClient().SendAsync(req);
-                    _cpf.Logger.Log(LogLevel.Warning, $"FlushLogGroupEntry.End: topic={topicId} logs={lg.Logs.Count}");
+                    _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.End: topic={topicId} logs={lg.Logs.Count}");
                     if (resp.StatusCode == HttpStatusCode.OK)
                     {
                         return;
