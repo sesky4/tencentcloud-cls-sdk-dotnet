@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace TencentCloudCls
 {
     // similar to System.Threading.Channel, support .net framework
-    public class AsyncQueue<T>
+    internal class AsyncQueue<T>
     {
         private readonly SemaphoreSlim _notEmpty;
         private readonly SemaphoreSlim _notFull;
