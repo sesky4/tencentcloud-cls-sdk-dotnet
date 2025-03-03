@@ -146,10 +146,10 @@ namespace TencentCloudCls
                     return;
                 }
 
-                var countOk = lge.PolicyStat.BatchCount > _cpf.SendPolicy.MaxBatchCount;
-                var sizeOk = lge.PolicyStat.BatchSize > _cpf.SendPolicy.MaxBatchSize;
+                var countOk = lge.PolicyStat.BatchCount >= _cpf.SendPolicy.MaxBatchCount;
+                var sizeOk = lge.PolicyStat.BatchSize >= _cpf.SendPolicy.MaxBatchSize;
                 var intervalOk = _cpf.SendPolicy.FlushInterval != TimeSpan.Zero &&
-                                 DateTime.Now - lge.PolicyStat.LastUpload > _cpf.SendPolicy.FlushInterval;
+                                 DateTime.Now - lge.PolicyStat.LastUpload >= _cpf.SendPolicy.FlushInterval;
                 var shouldUpload = countOk || sizeOk || intervalOk;
 
                 if (!shouldUpload)
