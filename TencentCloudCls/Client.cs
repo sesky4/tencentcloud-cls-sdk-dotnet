@@ -171,11 +171,15 @@ namespace TencentCloudCls
                 lge.PolicyStat.LastUpload = DateTime.Now;
             }
 
-            await _toUpload.EnqueueAsync(new UploadTask
+            var enqueued = await _toUpload.EnqueueAsync(new UploadTask
             {
                 TopicId = lge.TopicId,
                 LogGroup = toUpload,
-            });
+            }, _cpf.SendPolicy.EnqueueTimeout);
+            if (!enqueued)
+            {
+                _cpf.Logger.LogWarning($"HintUpload.Discard: topic_id={lge.TopicId} count={lge.LogGroup.Logs.Count}");
+            }
         }
 
         private void InitializeLogGroup(LogGroup lg)

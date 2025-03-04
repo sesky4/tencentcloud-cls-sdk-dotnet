@@ -18,6 +18,7 @@ namespace TencentCloudCls
             MaxRetry = 3,
             MaxRetryInterval = TimeSpan.FromSeconds(60),
             Worker = 10,
+            EnqueueTimeout = TimeSpan.FromMilliseconds(100),
         };
 
         public static readonly SendPolicy LargeBatch = new()
@@ -28,6 +29,7 @@ namespace TencentCloudCls
             MaxRetry = 3,
             MaxRetryInterval = TimeSpan.FromSeconds(60),
             Worker = 10,
+            EnqueueTimeout = TimeSpan.FromMilliseconds(250),
         };
 
         public static readonly SendPolicy Default = SmallBatch;
@@ -51,6 +53,9 @@ namespace TencentCloudCls
 
         // Number of workers to upload log in background.
         public uint Worker;
+
+        // Max waiting time for log enqueue
+        public TimeSpan EnqueueTimeout;
 
         public bool EnableBatch => MaxBatchSize > 0 && MaxBatchCount > 0 && Worker > 0;
 

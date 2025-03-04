@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,15 +19,21 @@ namespace TencentCloudCls
             _queue = new Queue<T>(capacity);
         }
 
-        public async Task EnqueueAsync(T o)
+        public async Task<bool> EnqueueAsync(T o, TimeSpan timeout)
         {
-            await _notFull.WaitAsync();
+            var ok = await _notFull.WaitAsync(timeout);
+            if (!ok)
+            {
+                return false;
+            }
+            
             lock (this)
             {
                 _queue.Enqueue(o);
             }
 
             _notEmpty.Release();
+            return true;
         }
 
         public async Task<T> DequeueAsync()
