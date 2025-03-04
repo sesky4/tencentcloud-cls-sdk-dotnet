@@ -157,11 +157,8 @@ namespace TencentCloudCls
                     return;
                 }
 
-                _cpf.Logger.Log(LogLevel.Debug,
-                    $"HintUpload: " +
-                    $"count={lge.LogGroup.Logs.Count} " +
-                    $"last_upload={lge.PolicyStat.LastUpload} " +
-                    $"size={lge.PolicyStat.BatchSize} ");
+                _cpf.Logger.Log(LogLevel.Debug, "HintUpload: count={} last_upload={} size={}", lge.LogGroup.Logs.Count,
+                    lge.PolicyStat.LastUpload, lge.PolicyStat.BatchSize);
 
                 toUpload = lge.LogGroup;
                 lge.LogGroup = new LogGroup();
@@ -178,7 +175,8 @@ namespace TencentCloudCls
             }, _cpf.SendPolicy.EnqueueTimeout);
             if (!enqueued)
             {
-                _cpf.Logger.LogWarning($"HintUpload.Discard: topic_id={lge.TopicId} count={lge.LogGroup.Logs.Count}");
+                _cpf.Logger.LogWarning("HintUpload.Discard: topic_id={} count={}", lge.TopicId,
+                    lge.LogGroup.Logs.Count);
             }
         }
 
@@ -238,10 +236,11 @@ namespace TencentCloudCls
                 try
                 {
                     using var req = CreateRequest(topicId, lg);
-                    _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.Start: topic={topicId} logs={lg.Logs.Count}");
+                    _cpf.Logger.Log(LogLevel.Debug, "FlushLogGroupEntry.Start: topic={} logs={}", topicId,
+                        lg.Logs.Count);
 
                     using var resp = await GetHttpClient().SendAsync(req);
-                    _cpf.Logger.Log(LogLevel.Debug, $"FlushLogGroupEntry.End: topic={topicId} logs={lg.Logs.Count}");
+                    _cpf.Logger.Log(LogLevel.Debug, "FlushLogGroupEntry.End: topic={} logs={}", topicId, lg.Logs.Count);
                     if (resp.StatusCode == HttpStatusCode.OK)
                     {
                         return;
@@ -249,28 +248,28 @@ namespace TencentCloudCls
 
                     if (!await ShouldRetryAndWait(i, resp))
                     {
-                        _cpf.Logger.Log(LogLevel.Error,
-                            $"FlushLogGroupEntry.Throw: topic={topicId} logs={lg.Logs.Count}");
+                        _cpf.Logger.Log(LogLevel.Error, "FlushLogGroupEntry.Throw: topic={} logs={}", topicId,
+                            lg.Logs.Count);
                         var requestId = resp.Headers.GetValues("X-Cls-Requestid").FirstOrDefault();
                         var httpBody = await resp.Content.ReadAsStringAsync();
                         throw new TencentCloudSdkError(resp.StatusCode, requestId, httpBody);
                     }
 
-                    _cpf.Logger.Log(LogLevel.Warning,
-                        $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
+                    _cpf.Logger.Log(LogLevel.Warning, "FlushLogGroupEntry.Retry: topic={} logs={} retry={}", topicId,
+                        lg.Logs.Count, i);
                 }
                 catch (Exception e)
                 {
-                    _cpf.Logger.Log(LogLevel.Error,
-                        $"FlushLogGroupEntry.Err: topic={topicId} logs={lg.Logs.Count} err={e}");
+                    _cpf.Logger.Log(LogLevel.Error, "FlushLogGroupEntry.Err: topic={} logs={} err={}", topicId,
+                        lg.Logs.Count, e);
 
                     if (!await ShouldRetryAndWait(i, null))
                     {
                         throw;
                     }
 
-                    _cpf.Logger.Log(LogLevel.Warning,
-                        $"FlushLogGroupEntry.Retry: topic={topicId} logs={lg.Logs.Count} retry={i}");
+                    _cpf.Logger.Log(LogLevel.Warning, "FlushLogGroupEntry.Retry: topic={} logs={} retry={}", topicId,
+                        lg.Logs.Count, i);
                 }
             }
 
@@ -313,12 +312,12 @@ namespace TencentCloudCls
                 }
                 catch (TencentCloudSdkError e)
                 {
-                    _cpf.Logger.Log(LogLevel.Error,
-                        $"UploadWorker.Upload: topic={task.TopicId} logs={task.LogGroup.Logs.Count} err={e}");
+                    _cpf.Logger.Log(LogLevel.Error, "UploadWorker.Upload: topic={} logs={} err={}", task.TopicId,
+                        task.LogGroup.Logs.Count, e);
                 }
                 catch (Exception e)
                 {
-                    _cpf.Logger.Log(LogLevel.Error, $"UploadWorker.FlushLogGroupEntry.Error: err={e}");
+                    _cpf.Logger.Log(LogLevel.Error, "UploadWorker.FlushLogGroupEntry.Error: err={}", e);
                 }
             }
         }
@@ -336,7 +335,7 @@ namespace TencentCloudCls
                     }
                     catch (Exception e)
                     {
-                        _cpf.Logger.Log(LogLevel.Error, $"IntervalUploadWorker.HintUpload.Error: err={e}");
+                        _cpf.Logger.Log(LogLevel.Error, "IntervalUploadWorker.HintUpload.Error: err={}", e);
                     }
                 }
             }
