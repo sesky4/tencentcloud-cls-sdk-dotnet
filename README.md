@@ -55,3 +55,4 @@ SendPolicy
 | MaxRetry         | uint     | 上报日志失败时的重试次数                                                            |
 | MaxRetryInterval | uint     | 上报日志失败时的重试最大间隔，重试间隔采用指数退避，第 N 次重试间隔为 `Min(2^(N-1), MaxRetryInterval)` 秒 |
 | Worker           | uint     | 异步场景下上报日志的 worker 数量                                                    |
+| EnqueueTimeout   | TimeSpan | 日志入上报队列的最大等待时间                                                          |
